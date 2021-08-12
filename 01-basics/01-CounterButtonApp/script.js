@@ -10,6 +10,9 @@ createApp({
 	methods: {
 		counterIncremet() {
 			++this.counter
+		},
+		counterDecremet() {
+			--this.counter
 		}
 	}
 }).mount('#app')

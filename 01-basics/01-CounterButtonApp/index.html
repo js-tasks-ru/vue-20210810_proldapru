@@ -6,7 +6,11 @@
   </head>
   <body>
     <div id="app">
-      <button type="button" @click="counterIncremet">{{ counter }}</button>
+      <button type="button" style="width:50px;"
+        @click.left="counterIncremet"
+        @click.right.prevent="counterDecremet"
+        @click.middle="counter = 0"
+      >{{ counter }}</button>
     </div>
 
     <script type="module" src="script.js"></script>
