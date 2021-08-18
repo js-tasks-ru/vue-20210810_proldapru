@@ -44,6 +44,6 @@ createApp({
     }
   },
   mounted() {
-    document.querySelector('input[type="search"]').focus()
+    this.$refs['searchInput'].focus();
   }
 }).mount('#app')
