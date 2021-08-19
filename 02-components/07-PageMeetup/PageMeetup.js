@@ -45,7 +45,6 @@ export default defineComponent({
         this.meetupLoadingInProgress = true
         fetchMeetupById(nVal).then(r=>{
           this.currentMeetup = r
-          this.$options.meetupsCache.set(this.meetupId, r)
         }).catch(r=>{
           this.errorOccured = r.message
         }).finally(()=>{
