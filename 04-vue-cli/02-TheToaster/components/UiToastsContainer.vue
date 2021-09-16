@@ -1,6 +1,6 @@
 <template>
   <div class="toasts">
-    <ui-toast v-for="(toast, index) in toasts" :key="toast.id" v-bind="toast"/>
+    <ui-toast v-for="toast in toasts" :key="toast.id" v-bind="toast"/>
   </div>
 </template>
 
@@ -20,22 +20,25 @@ export default {
     }
   },
 
-  inject: ['toasterConfig'],
-
   data() {
     return {
       toasts: [],
     }
   },
 
+  props: {
+    toastTimeout: {type: Number, default: 5000},
+    needCloseButton: {type: Boolean, default: false},
+  },
+
   methods: {
     addToast({type='error', message}) {
       const toastObj = Object.assign(
-        {id: (new Date()).valueOf(), close: this.toasterConfig.needCloseButton},
+        {id: (new Date()).valueOf(), close: this.needCloseButton},
         arguments[0]
       )
       this.toasts.push(toastObj)
-      setTimeout(()=>{this.removeToast(toastObj.id)}, this.toasterConfig.toastTimeout)
+      setTimeout(()=>{this.removeToast(toastObj.id)}, this.toastTimeout)
     },
 
     removeToast(toastId) {

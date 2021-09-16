@@ -29,6 +29,12 @@ export default {
     message: {type: String, required: true},
     close: {type: Boolean, default: false},
   },
+
+  computed: {
+    messageBlockMargin() {
+      return this.close ? '10px' :  0
+    },
+  },
 };
 </script>
 
@@ -44,8 +50,7 @@ export default {
   z-index: 999;
 }
 
-@media all and (min-width: 992px) {/*  position: absolute;*/
-
+@media all and (min-width: 992px) {
   .toasts {
     bottom: 72px;
     right: 112px;
@@ -87,13 +92,12 @@ export default {
 /*  stroke: var(--red-light);*/
 }
 
-
 .toast.toast_info {
   color: var(--blue-2);
 }
 
 .toast__message {
-  margin-right: 10px;
+  margin-right: v-bind(messageBlockMargin);
 }
 
 .toast__close_button {

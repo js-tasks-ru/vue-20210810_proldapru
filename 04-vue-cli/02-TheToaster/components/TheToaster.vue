@@ -1,5 +1,5 @@
 <template>
-  <ui-toasts-container ref="toastsCont" />
+  <ui-toasts-container ref="toastsCont" v-bind="$data"/>
   <fieldset class="toaster-config">
     <legend>Toaster Settings</legend>
     <label for="timeout_input">Timeout (ms): <input id="timeout_input" type="number" size="5" v-model="toastTimeout"></label>
@@ -24,13 +24,6 @@ export default {
       needCloseButton: false,
     }
   },
-
-  provide() {
-    return {
-      toasterConfig: this.$data
-    }
-  },
-
 
   methods: {
     success(text) {
