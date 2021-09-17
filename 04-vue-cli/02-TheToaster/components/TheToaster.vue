@@ -1,73 +1,57 @@
 <template>
-  <div class="toasts">
-    <div class="toast toast_success">
-      <ui-icon class="toast__icon" icon="check-circle" />
-      <span>Success Toast Example</span>
-    </div>
+  <ui-toasts-container ref="toastsCont" v-bind="$data"/>
+  <fieldset class="toaster-config">
+    <legend>Toaster Settings</legend>
+    <label for="timeout_input">Timeout (ms): <input id="timeout_input" type="number" size="5" v-model="toastTimeout"></label>
+    
+    <label for="need_close_button">Need close button <input id="need_close_button" type="checkbox" v-model="needCloseButton"></label>
+    
+  </fieldset>
 
-    <div class="toast toast_error">
-      <ui-icon class="toast__icon" icon="alert-circle" />
-      <span>Error Toast Example</span>
-    </div>
-  </div>
 </template>
 
 <script>
-import UiIcon from './UiIcon';
+import UiToastsContainer from './UiToastsContainer';
 
 export default {
   name: 'TheToaster',
 
-  components: { UiIcon },
+  components: { UiToastsContainer },
+
+  data() {
+    return {
+      toastTimeout: 5000,
+      needCloseButton: false,
+    }
+  },
+
+  methods: {
+    success(text) {
+      this.$refs.toastsCont.addToast({type: 'success', message: text})
+    },
+
+    error(text) {
+      this.$refs.toastsCont.addToast({type: 'error', message: text})
+    },
+
+    warning(text) {
+      this.$refs.toastsCont.addToast({type: 'warning', message: text})
+    },
+
+    info(text) {
+      this.$refs.toastsCont.addToast({type: 'info', message: text})
+    },
+  },
 };
 </script>
 
 <style scoped>
-.toasts {
-  position: fixed;
-  bottom: 8px;
-  right: 8px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  white-space: pre-wrap;
-  z-index: 999;
-}
-
-@media all and (min-width: 992px) {
-  .toasts {
-    bottom: 72px;
-    right: 112px;
+  .toaster-config {
+    padding: 5px;
+    width: 230px;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
   }
-}
-
-.toast {
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: row;
-  align-items: center;
-  padding: 16px;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  font-size: 18px;
-  line-height: 28px;
-  width: auto;
-}
-
-.toast + .toast {
-  margin-top: 20px;
-}
-
-.toast__icon {
-  margin-right: 12px;
-}
-
-.toast.toast_success {
-  color: var(--green);
-}
-
-.toast.toast_error {
-  color: var(--red);
-}
 </style>
