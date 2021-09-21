@@ -2,19 +2,19 @@
   <div :class="`toast toast_${type}`">
     <ui-icon class="toast__icon" :icon="$options.iconByType[type]" />
     <span class="toast__message">{{ message }}</span>
-    <span v-if="close" class='toast__close_button' @click="toaster.removeToast(id)">✖</span>
+    <span v-if="close" class='toast__close_button' @click="$emit('removeToast', id)">✖</span>
   </div>
 </template>
 
 <script>
-import UiIcon from './UiIcon';
+import UiIcon from './UiIcon'
 
 export default {
   name: 'UiToast',
 
   components: { UiIcon },
 
-  inject: ['toaster'],
+  emits: ['removeToast'],
 
   iconByType: {
     error: 'alert-circle',

@@ -1,5 +1,5 @@
 <template>
-  <the-toaster ref="toaster" />
+  <the-toaster ref="toaster" :is-toaster-config-visible="isToasterConfigVisible" />
   <p class="buttons">
     <button @click="success">Add Success Message</button>
     <button @click="error">Add Error Message</button>
@@ -15,6 +15,12 @@ export default {
   name: 'App',
 
   components: { TheToaster },
+
+  data() {
+    return {
+      isToasterConfigVisible: true,
+    }
+  },
 
   methods: {
     success() {

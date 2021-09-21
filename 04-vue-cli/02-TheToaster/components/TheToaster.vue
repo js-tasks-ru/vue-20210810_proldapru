@@ -1,6 +1,9 @@
 <template>
-  <ui-toasts-container ref="toastsCont" v-bind="$data"/>
-  <fieldset class="toaster-config">
+  <ui-toaster>
+    <ui-toast v-for="toast in toasts" :key="toast.id" v-bind="toast" @removeToast="removeToast($event)" />
+  </ui-toaster>
+
+  <fieldset v-if="isToasterConfigVisible" class="toaster-config">
     <legend>Toaster Settings</legend>
     <label for="timeout_input">Timeout (ms): <input id="timeout_input" type="number" size="5" v-model="toastTimeout"></label>
     
@@ -11,35 +14,60 @@
 </template>
 
 <script>
-import UiToastsContainer from './UiToastsContainer';
+import UiToaster from './UiToaster'
+import UiToast from './UiToast'
 
 export default {
   name: 'TheToaster',
 
-  components: { UiToastsContainer },
+  components: {
+    UiToaster,
+    UiToast
+  },
 
   data() {
     return {
+      toasts: [],
       toastTimeout: 5000,
       needCloseButton: false,
     }
   },
 
+  props: {
+    isToasterConfigVisible: {
+      type: Boolean,
+      default: true,
+    },
+  },
+
   methods: {
+    addToast({type='error', message}) {
+      const toastObj = Object.assign(
+        {id: (new Date()).valueOf(), close: this.needCloseButton},
+        arguments[0]
+      )
+      this.toasts.push(toastObj)
+      setTimeout(()=>{this.removeToast(toastObj.id)}, this.toastTimeout)
+    },
+
+    removeToast(toastId) {
+      this.toasts.splice(this.toasts.findIndex(x=>x.id===toastId), 1)
+    },
+
     success(text) {
-      this.$refs.toastsCont.addToast({type: 'success', message: text})
+      this.addToast({type: 'success', message: text})
     },
 
     error(text) {
-      this.$refs.toastsCont.addToast({type: 'error', message: text})
+      this.addToast({type: 'error', message: text})
     },
 
     warning(text) {
-      this.$refs.toastsCont.addToast({type: 'warning', message: text})
+      this.addToast({type: 'warning', message: text})
     },
 
     info(text) {
-      this.$refs.toastsCont.addToast({type: 'info', message: text})
+      this.addToast({type: 'info', message: text})
     },
   },
 };
