@@ -1,21 +1,26 @@
 <template>
-  <div class="dropdown dropdown_opened">
-    <button type="button" class="dropdown__toggle dropdown__toggle_icon">
-      <ui-icon icon="tv" class="dropdown__icon" />
-      <span>Title</span>
+  <div class="dropdown" :class="{dropdown_opened: dropdownOpened}">
+    <button type="button"
+      class="dropdown__toggle" :class="{dropdown__toggle_icon: hasIcon}"
+      @click="toggleDropdown()"
+    >
+      <ui-icon v-if="hasIcon && !!dropdownIcon" :icon="dropdownIcon" class="dropdown__icon" />
+      <span>{{ dropdownTitle }}</span>
     </button>
 
-    <div class="dropdown__menu" role="listbox">
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <ui-icon icon="tv" class="dropdown__icon" />
-        Option 1
-      </button>
-      <button class="dropdown__item dropdown__item_icon" role="option" type="button">
-        <ui-icon icon="tv" class="dropdown__icon" />
-        Option 2
+    <div v-show="dropdownOpened" class="dropdown__menu" role="listbox">
+      <button v-for="opt in options" :key="opt.value"
+        class="dropdown__item" :class="{dropdown__item_icon: hasIcon}" role="option" type="button"
+        @click="setDropdownValue(opt.value)"
+      >
+        <ui-icon v-if="hasIcon && !!opt.icon" :icon="opt.icon" class="dropdown__icon" />
+        {{ opt.text }}
       </button>
     </div>
   </div>
+  <select v-model="selectElementValue">
+    <option v-for="opt in options" :key="`so_${opt.value}`" :value="opt.value">{{ opt.text }}</option>
+  </select>
 </template>
 
 <script>
@@ -25,10 +30,58 @@ export default {
   name: 'UiDropdown',
 
   components: { UiIcon },
+
+  props: {
+    options:    { type: Array,  required: true },
+    modelValue: { type: String, default:  undefined },
+    title:      { type: String, required: true },
+  },
+
+  emits: ['update:modelValue'],
+
+  data() {
+    return {
+      dropdownOpened: false,
+    }
+  },
+
+  computed: {
+    hasIcon() {
+      return !!~this.options.findIndex(x=>'icon' in x)
+    },
+
+    dropdownTitle() {
+      return this.modelValue ? this.options.find(x=>x.value===this.modelValue).text : this.title
+    },
+
+    dropdownIcon() {
+      return (this.hasIcon && this.modelValue) ? this.options.find(x=>x.value===this.modelValue).icon : undefined
+    },
+
+    selectElementValue: {
+      get() { return this.modelValue },
+      set(newVal) { this.$emit('update:modelValue', newVal) },
+    }
+  },
+
+  methods: {
+    toggleDropdown() {
+      this.dropdownOpened = !this.dropdownOpened
+    },
+
+    setDropdownValue(val) {
+      this.$emit('update:modelValue', val)
+      this.dropdownOpened = false
+    },
+  },
 };
 </script>
 
 <style scoped>
+select {
+  display: none;
+}
+
 .dropdown {
   position: relative;
   display: inline-block;
