@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import { useModelProxy } from '../composables/useModelProxy.js'
+
 export default {
   name: 'UiCheckbox',
   inheritAttrs: false,
@@ -17,7 +19,13 @@ export default {
 
   emits: ['update:modelValue'],
 
-  computed: {
+  setup(props, { emit }) {
+    return {
+      modelValueProxy: useModelProxy(props, { emit }, 'modelValue'),
+    };
+  },
+
+/*   computed: {
     modelValueProxy: {
       get() {
         return this.modelValue;
@@ -26,7 +34,7 @@ export default {
         this.$emit('update:modelValue', value);
       },
     },
-  },
+  }, */
 };
 </script>
 
