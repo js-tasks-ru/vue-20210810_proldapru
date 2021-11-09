@@ -28,6 +28,8 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue'
+
 export default {
   name: 'UiInput',
   inheritAttrs: false,
@@ -55,6 +57,35 @@ export default {
 
   emits: ['update:modelValue'],
 
+  setup(props, { slots, expose }) {
+    const input = ref(null)
+
+    const tag = computed(() => props.multiline ? 'textarea' : 'input')
+
+    const inputEvent = computed(() => props.modelModifiers?.lazy ? 'change' : 'input')
+
+    const focus = () => input.value.focus()
+
+    const hasLeftIcon = () => Boolean(slots['left-icon'])
+
+    const hasRightIcon = () => Boolean(slots['right-icon'])
+
+    expose({
+      focus,
+    })
+
+    return {
+      input,
+      tag,
+      inputEvent,
+      focus,
+      hasLeftIcon,
+      hasRightIcon,
+    }
+    
+  },
+
+/*
   computed: {
     tag() {
       return this.multiline ? 'textarea' : 'input'
@@ -75,6 +106,7 @@ export default {
       return Boolean(this.$slots['right-icon'])
     },
   },
+*/
 };
 </script>
 
