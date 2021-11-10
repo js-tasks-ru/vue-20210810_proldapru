@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+
 export default {
   name: 'UiButton',
 
@@ -17,7 +19,7 @@ export default {
       type: String,
       default: 'secondary',
       validator: (value) => {
-        return ['primary', 'secondary', 'danger'].some((x) => x === value)
+        return ['primary', 'secondary', 'danger'].includes(value)
       },
     },
     block: {
@@ -26,7 +28,22 @@ export default {
     },
   },
 
-  computed: {
+  setup(props, { attrs }) {
+    const buttonClasses = computed(() => {
+      let classes = ['button', `button_${props.variant}`]
+      if (props.block) classes.push('button_block')
+      return classes
+    })
+
+    const buttonType = computed(() => props.tag === 'button' ? (attrs.type ?? 'button') : undefined)
+    
+    return {
+      buttonClasses,
+      buttonType,
+    }
+  }
+
+/*  computed: {
     buttonClasses() {
       let classes = ['button', `button_${this.variant}`]
       if (this.block) classes.push('button_block')
@@ -36,6 +53,7 @@ export default {
       return this.tag === 'button' ? 'button' : undefined
     },
   },
+*/
 };
 </script>
 
