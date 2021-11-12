@@ -9,14 +9,26 @@
 </template>
 
 <script>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
 export default {
   name: 'MeetupsNav',
 
+  setup() {
+    const route = useRoute();
+    return {
+      showReturnToMeetups: computed(() => route.meta.showReturnToMeetups),
+    }
+  }
+
+/*
   computed: {
     showReturnToMeetups() {
       return this.$route.meta.showReturnToMeetups;
     },
   },
+*/
 };
 </script>
 

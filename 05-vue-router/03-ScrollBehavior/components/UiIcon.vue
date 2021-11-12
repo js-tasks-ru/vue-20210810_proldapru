@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import { computed } from 'vue';
+
 const icons = {
   'alert-circle': require('@/assets/icons/icon-alert-circle.svg'),
   'cal-sm': require('@/assets/icons/icon-cal-sm.svg'),
@@ -34,11 +36,20 @@ export default {
     },
   },
 
+  setup(props) {
+    return {
+      iconSrc: computed(() => icons[props.icon]),
+    }
+  }
+
+/*
   computed: {
     iconSrc() {
       return icons[this.icon];
     },
   },
+*/
+
 };
 </script>
 
