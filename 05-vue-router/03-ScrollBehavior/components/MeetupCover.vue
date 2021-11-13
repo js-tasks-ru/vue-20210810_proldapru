@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import { computed } from 'vue'
+
 export default {
   name: 'MeetupCover',
 
@@ -13,11 +15,19 @@ export default {
     image: { type: String },
   },
 
+  setup(props) {
+    return {
+      backgroundImage: computed(() => props.image ? `url('${props.image}')` : 'var(--default-cover)'),   
+    }
+  },
+
+/*
   computed: {
     backgroundImage() {
       return this.image ? `url('${this.image}')` : 'var(--default-cover)';
     },
   },
+*/
 };
 </script>
 

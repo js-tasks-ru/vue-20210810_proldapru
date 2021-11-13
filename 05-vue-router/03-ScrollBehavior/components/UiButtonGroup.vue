@@ -47,11 +47,19 @@ export default {
     },
   },
 
+  setup(props, { emit }) {
+    return {
+      select: (value) => { emit('update:view', value) },
+    }
+  }
+
+/*
   methods: {
     select(value) {
       this.$emit('update:view', value);
     },
   },
+*/
 };
 </script>
 

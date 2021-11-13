@@ -30,6 +30,10 @@ import UiBadge from './UiBadge';
 import UiCard from './UiCard';
 import UiIcon from './UiIcon';
 
+import { computed } from 'vue';
+import { useDateFormatters } from '../composables/useDateFormatters';
+
+
 export default {
   name: 'MeetupsListItem',
 
@@ -46,6 +50,15 @@ export default {
     },
   },
 
+  setup(props) {
+    const { formatAsLocalDate, formatAsIsoDate } = useDateFormatters();
+    return {
+      isoDate: computed(() => formatAsIsoDate(props.meetup.date)),
+      localeDate: computed(() => formatAsLocalDate(props.meetup.date)),
+    }
+  }
+
+/*
   computed: {
     isoDate() {
       return new Date(this.meetup.date).toISOString().split('T')[0];
@@ -59,6 +72,7 @@ export default {
       });
     },
   },
+*/
 };
 </script>
 

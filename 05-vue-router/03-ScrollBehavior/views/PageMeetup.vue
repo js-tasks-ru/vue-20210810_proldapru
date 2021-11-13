@@ -25,6 +25,9 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import { onBeforeRouteUpdate } from 'vue-router';
+
 import UiContainer from '../components/UiContainer';
 import UiAlert from '../components/UiAlert';
 import MeetupCover from '../components/MeetupCover';
@@ -35,17 +38,45 @@ export default {
 
   components: { MeetupCover, UiAlert, UiContainer },
 
+  setup(props) {
+    const meetup = ref(null)
+
+    const setMeetup = (meetupObject) => { meetup.value = meetupObject }
+
+    onBeforeRouteUpdate((to, from) => {
+      console.log('from setup guard', to, from)
+      if (to.params.meetupId !== from.params.meetupId) {
+        meetup.value = null;
+        return fetchMeetup(to.params.meetupId)
+          .then((meetupObject) => {
+            meetup.value = meetupObject;
+            //this.setMeetup(meetup);
+          })
+          .catch(() => ({ name: 'meetups' }));
+      }
+      return true;
+    })
+
+    return {
+      meetup,
+      setMeetup,
+     }
+  },
+
+  // аналога для этого guard нет в Composition API
   beforeRouteEnter(to) {
     return fetchMeetup(to.params.meetupId)
-      .then((meetup) => {
+      .then((meetupObject) => {
         return (vm) => {
-          vm.setMeetup(meetup);
+          vm.setMeetup(meetupObject);
         };
       })
       .catch(() => ({ name: 'meetups' }));
   },
 
-  beforeRouteUpdate(to, from) {
+/*
+   beforeRouteUpdate(to, from) {
+    console.log(to, from)
     if (to.params.meetupId !== from.params.meetupId) {
       this.meetup = null;
       return fetchMeetup(to.params.meetupId)
@@ -56,6 +87,7 @@ export default {
     }
     return true;
   },
+*/
 
   props: {
     meetupId: {
@@ -64,6 +96,7 @@ export default {
     },
   },
 
+/*
   data() {
     return {
       meetup: null,
@@ -75,6 +108,7 @@ export default {
       this.meetup = meetup;
     },
   },
+*/
 };
 </script>
 

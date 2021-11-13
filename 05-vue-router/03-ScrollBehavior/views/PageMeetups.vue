@@ -45,7 +45,11 @@ import UiButtonGroup from '../components/UiButtonGroup';
 import UiContainer from '../components/UiContainer';
 import UiAlert from '../components/UiAlert';
 import UiIcon from '../components/UiIcon';
-import { fetchMeetups } from '../api';
+// import { fetchMeetups } from '../api';
+
+import { useMeetupsFetch } from '../composables/useMeetupsFetch';
+import { useMeetupsFilters } from '../composables/useMeetupsFilters';
+import { useMeetupsView } from '../composables/useMeetupsView';
 
 export default {
   name: 'PageMeetups',
@@ -66,6 +70,23 @@ export default {
     UiAlert,
   },
 
+  setup() {
+    const { meetups } = useMeetupsFetch();
+    const { filter, filteredMeetups, dateFilterOptions } = useMeetupsFilters(meetups);
+    const { view } = useMeetupsView();
+
+    return {
+      // data
+      meetups,
+      filter,
+      view,
+      // options
+      dateFilterOptions,
+      // computed
+      filteredMeetups,
+    };
+  }
+/*
   data() {
     return {
       meetups: null,
@@ -111,6 +132,7 @@ export default {
       this.meetups = meetups;
     });
   },
+*/
 };
 </script>
 
