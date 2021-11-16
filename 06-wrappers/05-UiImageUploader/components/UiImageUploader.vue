@@ -1,15 +1,95 @@
 <template>
   <div class="image-uploader">
-    <label class="image-uploader__preview image-uploader__preview-loading" style="--bg-url: url('/link.jpeg')">
-      <span class="image-uploader__text">Загрузить изображение</span>
-      <input type="file" accept="image/*" class="image-uploader__input" />
+    <label
+      class="image-uploader__preview"
+      :class="{'image-uploader__preview-loading': state=='loading'}"
+      :style="imgUploaderPreviewBg"
+    >
+      <span class="image-uploader__text">{{ $options.uploader_state_note[state] }}</span>
+      <input
+        type="file"
+        v-bind="$attrs"
+        accept="image/*"
+        class="image-uploader__input"
+        @[inputEvent].prevent="inputEventHandler"
+        
+      />
     </label>
   </div>
 </template>
 
 <script>
+const uploader_state_note = {
+  loading: 'Загрузка...',
+  empty: 'Загрузить изображение',
+  delete: 'Удалить изображение',
+}
+
 export default {
   name: 'UiImageUploader',
+  inheritAttrs: false,
+  uploader_state_note,
+
+  props: {
+    preview: {
+      type: String,
+      default: undefined,
+    },
+    uploader: {
+      type: Function,
+    },
+  },
+
+  emits: ['select', 'remove', 'upload', 'error'],
+
+  data() {
+    return {
+      state: 'empty',
+    }
+  },
+
+  computed: {
+    imgUploaderPreviewBg() {
+      return this.preview ? `--bg-url: url('${this.preview}')` : undefined
+    },
+    inputEvent() {
+      return this.state === 'delete' ? 'click' : 'change'
+    },
+  },
+
+  methods: {
+    inputEventHandler(ev) {
+      if(this.state === 'loading') {
+        return
+      } else if(ev.type === 'click') {
+        this.$emit('remove')
+        this.state = 'empty'
+        ev.target.value = ''
+      } else {
+        this.$emit('select', ev.target.files[0])
+        if(this.uploader) {
+          this.state = 'loading'
+          this.uploader(ev.target.files[0])
+            .then((res) => {
+              this.$emit('upload', res) 
+              this.state = 'delete'
+            })
+            .catch((err) => {
+              this.$emit('error', err)
+              this.state = this.preview ? 'delete' : 'empty'
+              ev.target.value = ''
+            })
+        } else { // uploader не задан
+          this.state = 'delete'
+        }
+      }
+    
+    },
+  },
+
+  created() {
+    this.state = this.preview ? 'delete' : 'empty'
+  },
 };
 </script>
 
