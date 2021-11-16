@@ -5,7 +5,7 @@
       :class="{'image-uploader__preview-loading': state=='loading'}"
       :style="imgUploaderPreviewBg"
     >
-      <span class="image-uploader__text">{{ $options.uploader_state_note[state] }}</span>
+      <span class="image-uploader__text">{{ uploader_state_note[state] }}</span>
       <input
         type="file"
         v-bind="$attrs"
@@ -19,16 +19,20 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue'
+
+/*
 const uploader_state_note = {
   loading: 'Загрузка...',
   empty: 'Загрузить изображение',
   delete: 'Удалить изображение',
 }
+*/
 
 export default {
   name: 'UiImageUploader',
   inheritAttrs: false,
-  uploader_state_note,
+//  uploader_state_note,
 
   props: {
     preview: {
@@ -42,6 +46,60 @@ export default {
 
   emits: ['select', 'remove', 'upload', 'error'],
 
+  setup(props, { emit }) {
+    const uploader_state_note = {
+      loading: 'Загрузка...',
+      empty: 'Загрузить изображение',
+      delete: 'Удалить изображение',
+    }
+
+    const state = ref(props.preview ? 'delete' : 'empty')
+
+    const imgUploaderPreviewBg = computed(() => props.preview ? `--bg-url: url('${props.preview}')` : undefined)
+
+    const inputEvent = computed(() => state.value === 'delete' ? 'click' : 'change')
+
+    const inputEventHandler = (ev) => {
+      if(state.value === 'loading') {
+        return
+      } else if(ev.type === 'click') {
+        emit('remove')
+        state.value = 'empty'
+        ev.target.value = ''
+      } else {
+        emit('select', ev.target.files[0])
+        if(props.uploader) {
+          state.value = 'loading'
+          props.uploader(ev.target.files[0])
+            .then((res) => {
+              emit('upload', res) 
+              state.value = 'delete'
+            })
+            .catch((err) => {
+              emit('error', err)
+              state.value = props.preview ? 'delete' : 'empty'
+              ev.target.value = ''
+            })
+        } else { // uploader не задан
+          state.value = 'delete'
+        }
+      }
+    }
+
+    return {
+      // options
+      uploader_state_note,
+      // data
+      state,
+      // computed
+      imgUploaderPreviewBg,
+      inputEvent,
+      // methods
+      inputEventHandler,
+    }
+  },
+
+/*
   data() {
     return {
       state: 'empty',
@@ -90,6 +148,7 @@ export default {
   created() {
     this.state = this.preview ? 'delete' : 'empty'
   },
+*/
 };
 </script>
 
