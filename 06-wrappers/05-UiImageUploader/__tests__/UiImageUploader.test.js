@@ -39,8 +39,13 @@ describe('wrappers/UiImageUploader', () => {
 
     const IMAGE_ID = 42;
 
-    const mockUploaderResponse = { id: IMAGE_ID, image: 'link.jpeg' };
-    const mockUploader = jest.fn().mockResolvedValue(mockUploaderResponse);
+    let mockUploaderResponse;
+    let mockUploader;
+
+    beforeEach(() => {
+      mockUploaderResponse = { id: IMAGE_ID, image: 'link.jpeg' };
+      mockUploader = jest.fn().mockResolvedValue(mockUploaderResponse);
+    });
 
     it(`UiImageUploader должен иметь текст "${EMPTY_TEXT}", когда изображение не выбрано и preview не задан`, async () => {
       const wrapper = shallowMount(UiImageUploader, { props: { preview: undefined } });
