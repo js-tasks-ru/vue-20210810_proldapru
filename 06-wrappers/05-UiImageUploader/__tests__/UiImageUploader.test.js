@@ -129,7 +129,7 @@ describe('wrappers/UiImageUploader', () => {
 
     it(`UiImageUploader должен сбрасывать value у input когда изображение не удалось загрузить через uploader`, async () => {
       mockUploader.mockRejectedValueOnce(new Error());
-      const wrapper = shallowMount(UiImageUploader, { props: { preview: 'preview.jpeg', uploader: mockUploader } });
+      const wrapper = shallowMount(UiImageUploader, { props: { uploader: mockUploader } });
       const mockFile = createInputFileMock(wrapper.get('input'));
       await mockFile();
       await flushPromises();
