@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue';
 import UiInput from './UiInput';
 
 export default {
@@ -28,6 +29,27 @@ export default {
 
   emits: ['update:modelValue'],
 
+  setup(props, { attrs, emit }) {
+    const uiInput = ref(null)
+    const modelValueProxy = computed({
+      get() {
+        if(!props.modelValue) return '';
+
+        const dateParts = new Date(props.modelValue).toISOString().split(/T|\./)
+        if(!attrs.step || !(attrs.step % 60)) dateParts[1] = dateParts[1].substr(0, 5)
+        return props.type==='date' ?
+          dateParts[0] :
+          (props.type==='time' ? dateParts[1] : `${dateParts[0]}T${dateParts[1]}`)
+      },
+      set(newValue) {
+        emit('update:modelValue', uiInput.value.$refs.input.valueAsNumber)
+      }
+    })
+
+    return { uiInput, modelValueProxy }
+  },
+
+/*  
   computed: {
     modelValueProxy: {
       get() {
@@ -44,5 +66,6 @@ export default {
       },
     },
   },
+*/
 };
 </script>
