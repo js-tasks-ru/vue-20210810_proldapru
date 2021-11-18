@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import { ref, watch } from 'vue';
+
 export default {
   name: 'CounterButton',
 
@@ -19,6 +21,22 @@ export default {
 
   emits: ['update:count'],
 
+  setup(props, { emit }) {
+    const countLocal = ref(0)
+    watch(() => props.count, (newVal) => { countLocal.value = newVal }, { immediate: true })
+    const updateParent  = () => { if(props.count !== countLocal.value) emit('update:count', countLocal.value) }
+    const increaseCount = () => { countLocal.value++;   updateParent() }
+    const decreaseCount = () => { countLocal.value--;   updateParent() }
+    const resetCounter  = () => { countLocal.value = 0; updateParent() }
+
+    return {
+      countLocal,
+      increaseCount,
+      decreaseCount,
+      resetCounter,
+    }
+  },
+/*
   data() {
     return { countLocal: 0 }
   },
@@ -36,7 +54,7 @@ export default {
     decreaseCount() { this.countLocal--;   this.updateParent() },
     resetCounter()  { this.countLocal = 0; this.updateParent() },
   },
-
+*/
 };
 </script>
 <style scoped>
