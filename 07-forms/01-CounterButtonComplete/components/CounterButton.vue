@@ -24,10 +24,10 @@ export default {
   setup(props, { emit }) {
     const countLocal = ref(0)
     watch(() => props.count, (newVal) => { countLocal.value = newVal }, { immediate: true })
-    const updateParent  = () => { if(props.count !== countLocal.value) emit('update:count', countLocal.value) }
-    const increaseCount = () => { countLocal.value++;   updateParent() }
-    const decreaseCount = () => { countLocal.value--;   updateParent() }
-    const resetCounter  = () => { countLocal.value = 0; updateParent() }
+    watch(() => countLocal.value, (newVal) => { if(props.count !== newVal) emit('update:count', newVal) })
+    const increaseCount = () => { countLocal.value++   }
+    const decreaseCount = () => { countLocal.value--   }
+    const resetCounter  = () => { countLocal.value = 0 }
 
     return {
       countLocal,
