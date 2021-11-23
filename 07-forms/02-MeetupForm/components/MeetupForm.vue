@@ -1,18 +1,18 @@
 <template>
-  <form class="meetup-form">
+  <form class="meetup-form" @submit.prevent="handleSubmit()">
     <div class="meetup-form__content">
       <fieldset class="meetup-form__section">
         <ui-form-group label="Название">
-          <ui-input name="title" />
+          <ui-input name="title" v-model="meetupLocal.title"/>
         </ui-form-group>
         <ui-form-group label="Дата">
-          <ui-input-date type="date" name="date" />
+          <ui-input-date type="date" name="date" v-model="meetupLocal.date"/>
         </ui-form-group>
         <ui-form-group label="Место">
-          <ui-input name="place" />
+          <ui-input name="place" v-model="meetupLocal.place"/>
         </ui-form-group>
         <ui-form-group label="Описание">
-          <ui-input multiline rows="3" name="description" />
+          <ui-input multiline rows="3" name="description" v-model="meetupLocal.description"/>
         </ui-form-group>
         <ui-form-group label="Изображение">
           <!--
@@ -21,24 +21,29 @@
           -->
           <ui-image-uploader
             name="image"
-            :preview="meetup.image"
-            @select="meetup.imageToUpload = $event"
-            @remove="meetup.imageToUpload = null"
+            :preview="meetupLocal.image"
+            @select="setImageToUpload($event)"
+            @remove="meetupLocal.imageToUpload = null"
           />
         </ui-form-group>
       </fieldset>
 
       <h3 class="meetup-form__agenda-title">Программа</h3>
-      <!--
-      <meetup-agenda-item-form
+      <meetup-agenda-item-form v-for="agendaItem in meetupLocal.agenda"
          :key="agendaItem.id"
-         :agenda-item="..."
+         :agenda-item="agendaItem"
          class="meetup-form__agenda-item"
+         @update:agendaItem="updateAgendaItem($event, agendaItem.id)"
+         @remove="removeAgendaItem(agendaItem.id)"
        />
-       -->
 
       <div class="meetup-form__append">
-        <button class="meetup-form__append-button" type="button" data-test="addAgendaItem">
+        <button
+          class="meetup-form__append-button"
+          type="button"
+          data-test="addAgendaItem"
+          @click="addAgendaItem"
+        >
           + Добавить этап программы
         </button>
       </div>
@@ -47,9 +52,23 @@
     <div class="meetup-form__aside">
       <div class="meetup-form__aside-stick">
         <!-- data-test атрибуты используются для поиска нужного элемента в тестах, не удаляйте их -->
-        <ui-button variant="secondary" block class="meetup-form__aside-button" data-test="cancel">Отмена</ui-button>
-        <ui-button variant="primary" block class="meetup-form__aside-button" data-test="submit" type="submit">
-          SUBMIT
+        <ui-button
+          variant="secondary"
+          block
+          class="meetup-form__aside-button"
+          data-test="cancel"
+          @click="$emit('cancel')"
+        >
+          Отмена
+        </ui-button>
+        <ui-button
+          variant="primary"
+          block
+          class="meetup-form__aside-button"
+          data-test="submit"
+          type="submit"
+        >
+          {{ submitText }}
         </ui-button>
       </div>
     </div>
@@ -57,7 +76,8 @@
 </template>
 
 <script>
-// import { cloneDeep } from 'lodash-es';
+import { ref, toRefs, toRef, watch } from 'vue';
+import { cloneDeep } from 'lodash-es';
 
 import MeetupAgendaItemForm from './MeetupAgendaItemForm';
 import UiButton from './UiButton';
@@ -65,7 +85,7 @@ import UiFormGroup from './UiFormGroup';
 import UiImageUploader from './UiImageUploader';
 import UiInput from './UiInput';
 import UiInputDate from './UiInputDate';
-// import { createAgendaItem } from '../meetupService';
+import { createAgendaItem } from '../meetupService';
 
 export default {
   name: 'MeetupForm',
@@ -90,6 +110,113 @@ export default {
       default: '',
     },
   },
+
+  emits: ['cancel', 'submit'],
+
+  setup(props, { emit }) {
+    const meetupLocal = ref(null);
+
+    watch(
+      () => props.meetup,
+      (newVal) => { meetupLocal.value = cloneDeep(newVal) },
+      { immediate: true, deep: true }
+    );
+
+    const handleSubmit = () => {
+      emit('submit', cloneDeep(meetupLocal.value))
+    };
+
+    const addAgendaItem = () => {
+      const item = createAgendaItem()
+      if(meetupLocal.value.agenda.length)
+        item.startsAt = item.endsAt = meetupLocal.value.agenda[meetupLocal.value.agenda.length - 1].endsAt
+      meetupLocal.value.agenda.push(item)
+    };
+
+    const updateAgendaItem = (item, prevId) => {
+      meetupLocal.value.agenda[meetupLocal.value.agenda.findIndex(x => x.id == prevId)] = cloneDeep(item)
+    };
+
+    const removeAgendaItem = (id) => {
+      meetupLocal.value.agenda.splice(meetupLocal.value.agenda.findIndex(x => x.id == id), 1)
+    };
+
+/*
+    // Хотел сократить запись методов работы с agenda, но не смог =(
+
+    // const {agenda: ma} = toRefs(meetupLocal.value); // так вообще не заработало
+    // const ma = toRef(meetupLocal.value, 'agenda');  // аналогично
+    const ma = meetupLocal.value.agenda; // так работает до submit формы,
+                                         // потом добавлять/удалять пункты agenda отказывается
+
+    const addAgendaItem = () => {
+      const item = createAgendaItem()
+      if(ma.length)
+        item.startsAt = item.endsAt = ma[ma.length - 1].endsAt
+      ma.push(item)
+    };
+
+    const updateAgendaItem = (item, prevId) => {
+      ma[ma.findIndex(x => x.id == prevId)] = cloneDeep(item)
+    };
+
+    const removeAgendaItem = (id) => {
+      ma.splice(ma.findIndex(x => x.id == id), 1)
+    };
+*/
+
+    const setImageToUpload = (file) => {
+      if(!(file instanceof File)) throw new TypeError(`Parameter should be instance of File`)
+      meetupLocal.value.imageToUpload = URL.createObjectURL(file)
+    };
+
+    return {
+      meetupLocal,
+      handleSubmit,
+      addAgendaItem,
+      updateAgendaItem,
+      removeAgendaItem,
+      setImageToUpload,
+    };
+  },
+
+/*
+  data() {
+    return {
+      meetupLocal: null,
+    }
+  },
+
+  watch: {
+    meetup: {
+      immediate: true,
+      deep: true,
+      handler(newVal) { this.meetupLocal = cloneDeep(newVal) },
+    },
+  },
+
+  methods: {
+    handleSubmit() {
+      this.$emit('submit', cloneDeep(this.meetupLocal))
+    },
+    addAgendaItem() {
+      const item = createAgendaItem()
+      if(this.meetupLocal.agenda.length)
+        item.startsAt = item.endsAt = this.meetupLocal.agenda[this.meetupLocal.agenda.length - 1].endsAt
+      this.meetupLocal.agenda.push(item)
+    },
+    updateAgendaItem(item, prevId) {
+      this.meetupLocal.agenda[this.meetupLocal.agenda.findIndex(x=>x.id == prevId)] = cloneDeep(item)
+    },
+    removeAgendaItem(id) {
+      this.meetupLocal.agenda.splice(this.meetupLocal.agenda.findIndex(x=>x.id == id), 1)
+    },
+    setImageToUpload(file) {
+      if(!(file instanceof File)) throw new TypeError(`file should be instance of File`)
+      this.meetupLocal.imageToUpload = URL.createObjectURL(file)
+    },
+  },
+*/
 };
 </script>
 
