@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { ref, toRefs, toRef, watch } from 'vue';
+import { ref, toRef, watch } from 'vue';
 import { cloneDeep } from 'lodash-es';
 
 import MeetupAgendaItemForm from './MeetupAgendaItemForm';
@@ -115,10 +115,14 @@ export default {
 
   setup(props, { emit }) {
     const meetupLocal = ref(null);
+    let ma = {};
 
     watch(
       () => props.meetup,
-      (newVal) => { meetupLocal.value = cloneDeep(newVal) },
+      (newVal) => {
+        meetupLocal.value = cloneDeep(newVal)
+        ma = toRef(meetupLocal.value, 'agenda').value // сокращение для agenda
+      },
       { immediate: true, deep: true }
     );
 
@@ -128,46 +132,26 @@ export default {
 
     const addAgendaItem = () => {
       const item = createAgendaItem()
-      if(meetupLocal.value.agenda.length)
-        item.startsAt = item.endsAt = meetupLocal.value.agenda[meetupLocal.value.agenda.length - 1].endsAt
-      meetupLocal.value.agenda.push(item)
-    };
-
-    const updateAgendaItem = (item, prevId) => {
-      meetupLocal.value.agenda[meetupLocal.value.agenda.findIndex(x => x.id == prevId)] = cloneDeep(item)
-    };
-
-    const removeAgendaItem = (id) => {
-      meetupLocal.value.agenda.splice(meetupLocal.value.agenda.findIndex(x => x.id == id), 1)
-    };
-
-/*
-    // Хотел сократить запись методов работы с agenda, но не смог =(
-
-    // const {agenda: ma} = toRefs(meetupLocal.value); // так вообще не заработало
-    // const ma = toRef(meetupLocal.value, 'agenda');  // аналогично
-    const ma = meetupLocal.value.agenda; // так работает до submit формы,
-                                         // потом добавлять/удалять пункты agenda отказывается
-
-    const addAgendaItem = () => {
-      const item = createAgendaItem()
       if(ma.length)
         item.startsAt = item.endsAt = ma[ma.length - 1].endsAt
       ma.push(item)
     };
 
     const updateAgendaItem = (item, prevId) => {
-      ma[ma.findIndex(x => x.id == prevId)] = cloneDeep(item)
+      ma[ma.findIndex(x => x.id == prevId)] = item
     };
 
     const removeAgendaItem = (id) => {
       ma.splice(ma.findIndex(x => x.id == id), 1)
     };
-*/
 
     const setImageToUpload = (file) => {
       if(!(file instanceof File)) throw new TypeError(`Parameter should be instance of File`)
-      meetupLocal.value.imageToUpload = URL.createObjectURL(file)
+      // Обработка файла через FileReader
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => { meetupLocal.value.imageToUpload = reader.result }
+      reader.onerror = () => { throw new Error(reader.error) }
     };
 
     return {
@@ -180,43 +164,6 @@ export default {
     };
   },
 
-/*
-  data() {
-    return {
-      meetupLocal: null,
-    }
-  },
-
-  watch: {
-    meetup: {
-      immediate: true,
-      deep: true,
-      handler(newVal) { this.meetupLocal = cloneDeep(newVal) },
-    },
-  },
-
-  methods: {
-    handleSubmit() {
-      this.$emit('submit', cloneDeep(this.meetupLocal))
-    },
-    addAgendaItem() {
-      const item = createAgendaItem()
-      if(this.meetupLocal.agenda.length)
-        item.startsAt = item.endsAt = this.meetupLocal.agenda[this.meetupLocal.agenda.length - 1].endsAt
-      this.meetupLocal.agenda.push(item)
-    },
-    updateAgendaItem(item, prevId) {
-      this.meetupLocal.agenda[this.meetupLocal.agenda.findIndex(x=>x.id == prevId)] = cloneDeep(item)
-    },
-    removeAgendaItem(id) {
-      this.meetupLocal.agenda.splice(this.meetupLocal.agenda.findIndex(x=>x.id == id), 1)
-    },
-    setImageToUpload(file) {
-      if(!(file instanceof File)) throw new TypeError(`file should be instance of File`)
-      this.meetupLocal.imageToUpload = URL.createObjectURL(file)
-    },
-  },
-*/
 };
 </script>
 
