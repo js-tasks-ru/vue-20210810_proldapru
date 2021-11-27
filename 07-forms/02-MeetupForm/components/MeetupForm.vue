@@ -76,7 +76,7 @@
 </template>
 
 <script>
-import { ref, toRef, watch } from 'vue';
+import { ref, toRef, watch, computed } from 'vue';
 import { cloneDeep } from 'lodash-es';
 
 import MeetupAgendaItemForm from './MeetupAgendaItemForm';
@@ -115,13 +115,12 @@ export default {
 
   setup(props, { emit }) {
     const meetupLocal = ref(null);
-    let ma = {};
+    const ma = computed(() => meetupLocal.value.agenda); // сокращение для работы с agenda
 
     watch(
       () => props.meetup,
       (newVal) => {
         meetupLocal.value = cloneDeep(newVal)
-        ma = toRef(meetupLocal.value, 'agenda').value // сокращение для agenda
       },
       { immediate: true, deep: true }
     );
@@ -132,17 +131,17 @@ export default {
 
     const addAgendaItem = () => {
       const item = createAgendaItem()
-      if(ma.length)
-        item.startsAt = item.endsAt = ma[ma.length - 1].endsAt
-      ma.push(item)
+      if(ma.value.length)
+        item.startsAt = item.endsAt = ma.value[ma.value.length - 1].endsAt
+      ma.value.push(item)
     };
 
     const updateAgendaItem = (item, prevId) => {
-      ma[ma.findIndex(x => x.id == prevId)] = item
+      ma.value[ma.value.findIndex(x => x.id == prevId)] = item
     };
 
     const removeAgendaItem = (id) => {
-      ma.splice(ma.findIndex(x => x.id == id), 1)
+      ma.value.splice(ma.value.findIndex(x => x.id == id), 1)
     };
 
     const setImageToUpload = (file) => {
