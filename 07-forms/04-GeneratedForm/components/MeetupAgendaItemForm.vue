@@ -1,36 +1,6 @@
-<template>
-  <fieldset class="agenda-item-form">
-    <button type="button" class="agenda-item-form__remove-button">
-      <ui-icon icon="trash" />
-    </button>
-
-    <ui-form-group>
-      <ui-dropdown title="Тип" :options="$options.agendaItemTypeOptions" name="type" />
-    </ui-form-group>
-
-    <div class="agenda-item-form__row">
-      <div class="agenda-item-form__col">
-        <ui-form-group label="Начало">
-          <ui-input type="time" placeholder="00:00" name="startsAt" />
-        </ui-form-group>
-      </div>
-      <div class="agenda-item-form__col">
-        <ui-form-group label="Окончание">
-          <ui-input type="time" placeholder="00:00" name="endsAt" />
-        </ui-form-group>
-      </div>
-    </div>
-
-    <ui-form-group label="Заголовок">
-      <ui-input name="title" />
-    </ui-form-group>
-    <ui-form-group label="Описание">
-      <ui-input multiline name="description" />
-    </ui-form-group>
-  </fieldset>
-</template>
-
 <script>
+import { ref, computed, watch, h, resolveComponent } from 'vue';
+
 import UiIcon from './UiIcon';
 import UiFormGroup from './UiFormGroup';
 import UiInput from './UiInput';
@@ -151,6 +121,10 @@ const agendaItemFormSchemas = {
   },
 };
 
+const timeToMiliseconds = (time) => (time.substr(0, 2) * 3600 + time.substr(3, 2) * 60) * 1000;
+
+const timeFromMiliseconds = (mls) => new Date(mls).toISOString().substr(11, 5)
+
 export default {
   name: 'MeetupAgendaItemForm',
 
@@ -164,6 +138,68 @@ export default {
       type: Object,
       required: true,
     },
+  },
+  
+  emits: ['update:agendaItem', 'remove'],
+  
+  setup(props, { emit }) {
+    const agendaItemLocal = ref({ ...props.agendaItem })
+
+    watch(
+      () => agendaItemLocal.value,
+      () => { emit('update:agendaItem', agendaItemLocal.value) },
+      { deep: true }
+    )
+
+    let prevStartsAt = timeToMiliseconds(agendaItemLocal.value.startsAt)
+    const updateEndsAt = (ev) => {
+      const curStartsAt = ev.target.valueAsNumber
+      agendaItemLocal.value.endsAt = timeFromMiliseconds(timeToMiliseconds(agendaItemLocal.value.endsAt) + (curStartsAt - prevStartsAt))
+      prevStartsAt = curStartsAt
+    }
+
+    const nameAndVModelParams = (name) => {
+      return {
+        name,
+        modelValue: agendaItemLocal.value[name],
+        'onUpdate:modelValue': ($event) => { agendaItemLocal.value[name] = $event},
+      }
+    }
+
+    const generatedFormElements = (type) => {
+      const elements = []
+      for(const el in agendaItemFormSchemas[type]) elements.push(h(
+        UiFormGroup,
+        { label: agendaItemFormSchemas[type][el].label },
+        () => h(resolveComponent(agendaItemFormSchemas[type][el].component), {
+          ...agendaItemFormSchemas[type][el].props,
+          ...nameAndVModelParams(el),
+      })))
+      return elements
+    }
+
+    return () => h('fieldset', { class: 'agenda-item-form' }, [
+      h('button', { type: 'button', class: 'agenda-item-form__remove-button', onClick: () => emit('remove') }, h(UiIcon, {icon: 'trash'})),
+      h(UiFormGroup, ()=>h(UiDropdown, {
+        title: 'Тип',
+        options: agendaItemTypeOptions,
+        ...nameAndVModelParams('type'),
+      })),
+      h('div', { class: 'agenda-item-form__row'}, [
+        h('div', { class: 'agenda-item-form__col'}, h(UiFormGroup, { label: 'Начало' }, () => h(UiInput, {
+          type: 'time',
+          placeholder: '00:00',
+          ...nameAndVModelParams('startsAt'),
+          onChange:  updateEndsAt,
+        }))),
+        h('div', { class: 'agenda-item-form__col'}, h(UiFormGroup, { label: 'Окончание' }, () => h(UiInput, {
+          type: 'time',
+          placeholder: '00:00',
+          ...nameAndVModelParams('endsAt'),
+        }))),
+      ]),
+      ...generatedFormElements(agendaItemLocal.value.type),
+    ])
   },
 };
 </script>
