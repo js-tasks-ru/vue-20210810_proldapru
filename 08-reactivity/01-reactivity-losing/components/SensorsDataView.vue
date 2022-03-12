@@ -1,8 +1,12 @@
 <template>
   <div v-if="!sensors">Loading...</div>
   <template v-else>
-    <sensors-data-row v-for="sensor in sensors" :key="sensor.id" :sensor="sensor" />
+    <!-- Так не перерисовывалось, хотя Computed ниже отрабатывал -->
+    <!-- <sensors-data-row v-for="sensor in sensors" :key="sensor.id" :sensor="sensor" /> -->
+    <!-- Так перерисовывается (изменил key) -->
+    <sensors-data-row v-for="sensor in sensors" :key="`${sensor.id}_${sensor.value}`" :sensor="sensor" />
   </template>
+  <div>Computed {{ v46242 }}</div>
 </template>
 
 <script>
@@ -42,8 +46,15 @@ export default {
     },
 
     setData(sensors) {
-      this.sensors = sensors;
+      // this.sensors = sensors;
+       this.sensors = { ...sensors };
     },
+  },
+  computed: {
+    v46242() {
+      // console.log(this.sensors['46242'].value);
+      return this.sensors ? this.sensors['46242'].value : 0;
+    }
   },
 };
 </script>
