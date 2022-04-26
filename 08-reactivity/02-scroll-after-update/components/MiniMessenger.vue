@@ -14,7 +14,9 @@
 </template>
 
 <script>
+import { version, nextTick } from 'vue';
 let lastId = 0;
+let vue3version = version.split('.');
 
 export default {
   name: 'MiniMessenger',
@@ -32,9 +34,17 @@ export default {
   },
 
   methods: {
-    handleSendSubmit() {
+    async handleSendSubmit() {
       this.send();
-      this.$refs.items.at(-1).scrollIntoView();
+
+      await nextTick();
+
+      // Обработка template refs для v-for отличается в разных версиях vue3
+      if(vue3version[1] >=2 && vue3version[2] >= 25) {
+        this.$refs.items.at(-1).scrollIntoView();
+      } else {
+        this.$refs.items.scrollIntoView();
+      }
     },
 
     send() {
