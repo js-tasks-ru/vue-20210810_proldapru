@@ -1,10 +1,7 @@
 <template>
   <div v-if="!sensors">Loading...</div>
   <template v-else>
-    <!-- Так не перерисовывалось, хотя Computed ниже отрабатывал -->
-    <!-- <sensors-data-row v-for="sensor in sensors" :key="sensor.id" :sensor="sensor" /> -->
-    <!-- Так перерисовывается (изменил key) -->
-    <sensors-data-row v-for="sensor in sensors" :key="`${sensor.id}_${sensor.value}`" :sensor="sensor" />
+    <sensors-data-row v-for="sensor in sensors" :key="sensor.id" :sensor="sensor" />
   </template>
   <div>Computed {{ v46242 }}</div>
 </template>
@@ -13,6 +10,8 @@
 import { SensorsDataController } from '../services/SensorsDataController';
 import { SensorsDataStreamingService } from '../services/SensorsDataStreamingService';
 import SensorsDataRow from './SensorsDataRow';
+
+import {cloneDeep} from 'lodash';
 
 export default {
   name: 'SensorsDataView',
@@ -47,7 +46,12 @@ export default {
 
     setData(sensors) {
       // this.sensors = sensors;
-       this.sensors = { ...sensors };
+      // this.sensors = { ...sensors };
+
+      // Клонирование без lodash
+      // this.sensors = JSON.parse(JSON.stringify(sensors));
+
+      this.sensors = cloneDeep(sensors);
     },
   },
   computed: {
