@@ -1,7 +1,7 @@
 <template>
   <div class="sample container">
-    <p>source = <input v-model="source.value" type="number" /></p>
-    <pre><code>history = {{ history.value }}</code></pre>
+    <p>source = <input v-model="source" type="number" /></p>
+    <pre><code>history = {{ history }}</code></pre>
   </div>
 </template>
 
@@ -12,7 +12,13 @@ import { refHistory } from './utils/refHistory';
 export default {
   name: 'App',
 
-  created() {
+  setup() {
+    const source = ref(0);
+    const { history } = refHistory(source);
+    return { source, history }
+  },
+
+/*  created() {
     // Здесь лучше использовать Composition API, но мы с ним пока не знакомы
     // Для примера и ручного тестирования подойдёт и такое нетипичное решение
 
@@ -21,6 +27,7 @@ export default {
     const { history } = refHistory(this.source);
     this.history = history;
   },
+*/
 };
 </script>
 
