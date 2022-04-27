@@ -3,12 +3,15 @@
   <template v-else>
     <sensors-data-row v-for="sensor in sensors" :key="sensor.id" :sensor="sensor" />
   </template>
+  <div>Computed {{ v46242 }}</div>
 </template>
 
 <script>
 import { SensorsDataController } from '../services/SensorsDataController';
 import { SensorsDataStreamingService } from '../services/SensorsDataStreamingService';
 import SensorsDataRow from './SensorsDataRow';
+
+import {cloneDeep} from 'lodash';
 
 export default {
   name: 'SensorsDataView',
@@ -42,8 +45,20 @@ export default {
     },
 
     setData(sensors) {
-      this.sensors = sensors;
+      // this.sensors = sensors;
+      // this.sensors = { ...sensors };
+
+      // Клонирование без lodash
+      // this.sensors = JSON.parse(JSON.stringify(sensors));
+
+      this.sensors = cloneDeep(sensors);
     },
+  },
+  computed: {
+    v46242() {
+      // console.log(this.sensors['46242'].value);
+      return this.sensors ? this.sensors['46242'].value : 0;
+    }
   },
 };
 </script>
