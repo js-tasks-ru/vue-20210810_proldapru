@@ -1,7 +1,7 @@
 <template>
   <div class="sample container">
-    <p>source = <input v-model="source.value" type="number" /></p>
-    <p>Debounced source (wait=1000ms) = {{ debouncedSource.value }}</p>
+    <p>source = <input v-model="source" type="number" /></p>
+    <p>Debounced source (wait=1000ms) = {{ debouncedSource }}</p>
   </div>
 </template>
 
@@ -12,13 +12,10 @@ import { debouncedRef } from './utils/debouncedRef';
 export default {
   name: 'App',
 
-  created() {
-    // Здесь лучше использовать Composition API, но мы с ним пока не знакомы
-    // Для примера и ручного тестирования подойдёт и такое нетипичное решение
-
-    this.source = ref(0);
-
-    this.debouncedSource = debouncedRef(this.source, 1000);
+  setup() {
+    const source = ref(0);
+    const debouncedSource = debouncedRef(source, 1000);
+    return { source, debouncedSource }
   },
 };
 </script>
