@@ -1,11 +1,11 @@
 <template>
   <div class="sample container">
-    <p>foo = <input v-model="foo.value" type="number" /></p>
+    <p>foo = <input v-model="foo" type="number" /></p>
     <p>bar = {{ bar }}</p>
-    <p>sqr(foo) = {{ computedSqrFoo.value }}</p>
-    <p>sum(foo, bar) = {{ computedSumFooBar.value }}</p>
-    <p>minutesToHHMM(foo) = {{ computedMinutesToHHMMFoo.value }}</p>
-    <p>minutesToHHMM(sqr(foo)) = {{ computedMinutesToHHMMSqrFoo.value }}</p>
+    <p>sqr(foo) = {{ computedSqrFoo }}</p>
+    <p>sum(foo, bar) = {{ computedSumFooBar }}</p>
+    <p>minutesToHHMM(foo) = {{ computedMinutesToHHMMFoo }}</p>
+    <p>minutesToHHMM(sqr(foo)) = {{ computedMinutesToHHMMSqrFoo }}</p>
     <p></p>
   </div>
 </template>
@@ -17,10 +17,7 @@ import { reactify } from './utils/reactify';
 export default {
   name: 'App',
 
-  created() {
-    // Здесь лучше использовать Composition API, но мы с ним пока не знакомы
-    // Для примера и ручного тестирования подойдёт и такое нетипичное решение
-
+  setup() {
     // Исходные обычные чистые функции
     const sum = (a, b) => a + b;
     const sqr = (num) => num ** 2;
@@ -35,15 +32,24 @@ export default {
     const reactiveMinutesToHHMM = reactify(minutesToHHMM);
 
     // Значения для тестрования
-    this.foo = ref(0);
-    this.bar = 10;
+    const foo = ref(0);
+    const bar = 10;
 
     // Вычисляемые свойства в результате использования реактивных функций
-    this.computedSqrFoo = reactiveSqr(this.foo);
-    this.computedSumFooBar = reactiveSum(this.foo, this.bar);
-    this.computedMinutesToHHMMFoo = reactiveMinutesToHHMM(this.foo);
-    this.computedMinutesToHHMMSqrFoo = reactiveMinutesToHHMM(this.computedSqrFoo);
-    // this.computedStringLength = reactiveSum(a, b);
+    const computedSqrFoo = reactiveSqr(foo);
+    const computedSumFooBar = reactiveSum(foo, bar);
+    const computedMinutesToHHMMFoo = reactiveMinutesToHHMM(foo);
+    const computedMinutesToHHMMSqrFoo = reactiveMinutesToHHMM(computedSqrFoo);
+    // const computedStringLength = reactiveSum(a, b);
+
+    return {
+      foo,
+      bar,
+      computedSqrFoo,
+      computedSumFooBar,
+      computedMinutesToHHMMFoo,
+      computedMinutesToHHMMSqrFoo,
+    }
   },
 };
 </script>
