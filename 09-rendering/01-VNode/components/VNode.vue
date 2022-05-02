@@ -11,5 +11,9 @@ export default {
       validator: (vnodes) => (Array.isArray(vnodes) ? vnodes : [vnodes]).every((mustBeVNode) => isVNode(mustBeVNode)),
     },
   },
+
+  setup(props) {
+    return () => props.vnode;
+  },
 };
 </script>
