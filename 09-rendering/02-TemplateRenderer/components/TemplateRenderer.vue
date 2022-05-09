@@ -25,28 +25,50 @@ export default {
   // components: {UiAlert},
 
   setup(props, context) {
-    /*** Так не сработало ***/
-    /*** Ошибка: Uncaught TypeError: bindings is undefined ***/
+    /*** Так сработало ***/
     /*
-    const newComponent = defineComponent({
+    const newComponent = computed(() => defineComponent({
       name: 'newComponent',
-      props: { bindings: {...props.bindings} },
+      props: { bindings: { type: Object, default: () => ({})} },
       components: {...props.components},
       template: props.template,
-    });
-    return () => h(newComponent);
+    }));
+    return () => h(newComponent.value, { bindings: props.bindings });
     */
+
+
+    /*** Так не сработало ***/
+    /*** render отрабатывает только один раз, дальше на изменение props.template не реагирует ***/
+    /*
+    const renderFunction = computed(() => {
+      console.log(props.template);
+      return compile(props.template);
+    });
+    const newComponent = defineComponent({
+      name: 'newComponent',
+      props: { bindings: { type: Object, default: () => ({})} },
+      components: {...props.components},
+      render: renderFunction.value,
+    });
+    return () => h(newComponent, { ...props });
+    */
+
 
     /*** Так сработало ***/
     /**/
-    const renderFunction = computed(() => compile(props.template));
-    const newComponent = defineComponent({
-      name: 'newComponent',
-      components: {...props.components},
-      render: () => renderFunction.value.call(undefined, props),
+    const renderFunction = computed(() => {
+      // console.log(props.template);
+      return compile(props.template);
     });
-    return () => h(newComponent);
+    const newComponent = computed(() => defineComponent({
+      name: 'newComponent',
+      props: { bindings: { type: Object, default: () => ({})} },
+      components: {...props.components},
+      render: renderFunction.value,
+    }));
+    return () => h(newComponent.value, { bindings: props.bindings });
     /**/
+
   },
 };
 </script>
