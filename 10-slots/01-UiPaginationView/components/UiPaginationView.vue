@@ -12,6 +12,32 @@
   </div>
 </template>
 
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps({
+  page: {
+    type: Number,
+    required: true,
+    validator: (value) => value > 0,
+  },
+  perPage: {
+    type: Number,
+    required: true,
+    validator: (value) => value > 0,
+  },
+  items: {
+    type: Array,
+    required: true,
+  },
+});
+
+const pageMeetups = computed(
+  () => props.items.filter((x, ind) => (ind >= (props.page - 1) * props.perPage) && (ind < props.page * props.perPage))
+);
+</script>
+
+<!--
 <script>
 import { computed } from 'vue';
 export default {
@@ -43,5 +69,5 @@ export default {
   },
 };
 </script>
-
+-->
 <style></style>

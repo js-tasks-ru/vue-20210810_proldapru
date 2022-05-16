@@ -2,6 +2,35 @@
   <slot :name="slotParams.name" v-bind="slotParams.params" />
 </template>
 
+<script setup>
+import { ref, watch } from 'vue';
+
+const props = defineProps({
+  promise: {
+    type: Promise,
+    required: true,
+  },
+});
+
+const slotParams = ref({name: 'pending', params: {}});
+watch(
+  () => props.promise,
+  (newVal) => {
+    slotParams.value = { name: 'pending', params: {} };
+    props.promise
+      .then(result => {
+        // console.log(result);
+        slotParams.value = { name: 'fulfilled', params: {result} };
+      }).catch(error => {
+        // console.log(error.message);
+        slotParams.value = { name: 'rejected', params: {error} };
+      });
+  },
+  { immediate: true }
+);
+</script>
+
+<!--
 <script>
 import { ref, watch } from 'vue';
 export default {
@@ -59,3 +88,4 @@ export default {
 */
 };
 </script>
+-->
